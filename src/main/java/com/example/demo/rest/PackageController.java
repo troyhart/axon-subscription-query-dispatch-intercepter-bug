@@ -24,12 +24,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.api.CreatePackage;
-import com.example.demo.api.PackageRecordByIdQuery;
-import com.example.demo.api.UpdatePackage;
+import com.example.demo.api.commands.CreatePackage;
+import com.example.demo.api.commands.UpdatePackage;
+import com.example.demo.api.queries.PackageRecordByIdQuery;
 import com.example.demo.query.PackageRecord;
-import com.example.demo.rest.api.PackageRequest;
-import com.example.demo.rest.api.PackageIdentifierDto;
+import com.example.demo.rest.api.dtos.PackageIdentifier;
+import com.example.demo.rest.api.dtos.PackageRequest;
 
 import reactor.core.publisher.Flux;
 
@@ -50,12 +50,12 @@ public class PackageController {
 
 
   @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-  public CompletableFuture<PackageIdentifierDto> create(@RequestBody PackageRequest request) {
+  public CompletableFuture<PackageIdentifier> create(@RequestBody PackageRequest request) {
     Assert.notNull(request, "null request)");
 
     return commandGateway
         .send(new CreatePackage(UUID.randomUUID().toString(), request.getType(), request.getDescription()))
-        .thenApply(id -> new PackageIdentifierDto(id.toString()));
+        .thenApply(id -> new PackageIdentifier(id.toString()));
   }
 
 

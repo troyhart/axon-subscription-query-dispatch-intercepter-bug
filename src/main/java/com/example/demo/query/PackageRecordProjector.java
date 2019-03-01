@@ -15,9 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-import com.example.demo.api.PackageCreated;
-import com.example.demo.api.PackageRecordByIdQuery;
-import com.example.demo.api.PackageUpdated;
+import com.example.demo.api.events.PackageCreated;
+import com.example.demo.api.events.PackageUpdated;
+import com.example.demo.api.queries.PackageRecordByIdQuery;
 
 
 @Component
@@ -38,7 +38,6 @@ public class PackageRecordProjector {
   @QueryHandler
   public PackageRecord handle(PackageRecordByIdQuery query, @MetaDataValue("USER_INFO") Object userInfo) {
     assertUserCanQuery(query, userInfo);
-
     Optional<PackageRecord> record = packageRecordRepository.findById(query.getId());
     return record.isPresent() ? record.get() : null;
   }
@@ -46,49 +45,41 @@ public class PackageRecordProjector {
   @EventHandler
   public void on(PackageCreated event, @SequenceNumber long aggregateVersion, @Timestamp Instant occurrenceInstant,
       @MetaDataValue("USER_INFO") Object userInfo) {
-
     handleDebugEvent(event, userInfo);
-
     // @formatter:off
     PackageRecord packageRecord = new PackageRecord()
         .setPackageId(event.getPackageId())
         .setType(event.getType())
         .setDescription(event.getDescription())
-        .setCreatedBy(userInfo)
-        .setCreatedInstant(occurrenceInstant);
+        .setCreatedBy(userInfo).setLastUpdatedBy(userInfo)
+        .setCreatedInstant(occurrenceInstant).setLastUpdatedInstant(occurrenceInstant);
     // @formatter:on
-
     save(packageRecord, userInfo, occurrenceInstant, aggregateVersion);
   }
 
   @EventHandler
   public void on(PackageUpdated event, @SequenceNumber long aggregateVersion, @Timestamp Instant occurrenceInstant,
       @MetaDataValue("USER_INFO") Object userInfo) {
-
     handleDebugEvent(event, userInfo);
     Optional<PackageRecord> packageRecord = packageRecordRepository.findById(event.getPackageId());
-
-    if (!packageRecord.isPresent()) {
+    if (packageRecord.isPresent()) {
+      // @formatter:off
+      packageRecord.get()
+          .setType(event.getType())
+          .setDescription(event.getDescription())
+          .setLastUpdatedBy(userInfo)
+          .setLastUpdatedInstant(occurrenceInstant);
+      // @formatter:on
+      save(packageRecord.get(), userInfo, occurrenceInstant, aggregateVersion);
+    }
+    else {
       LOGGER.error("Can not locate pacakge to update!");
       return;
     }
-
-    // @formatter:off
-    packageRecord.get()
-        .setType(event.getType())
-        .setDescription(event.getDescription())
-        .setLastUpdatedBy(userInfo)
-        .setLastUpdatedInstant(occurrenceInstant);
-    // @formatter:on
-
-    save(packageRecord.get(), userInfo, occurrenceInstant, aggregateVersion);
   }
 
   private void save(PackageRecord packageRecord, Object userInfo, Instant occurrenceInstant, long aggregateVersion) {
-
-    packageRecord.setCreatedBy(userInfo).setCreatedInstant(occurrenceInstant);
     packageRecordRepository.save(packageRecord);
-
     LOGGER.trace("emitting update: {}", packageRecord);
     queryUpdateEmitter.emit(PackageRecordByIdQuery.class, query -> query.getId().equals(packageRecord.getPackageId()),
         packageRecord);

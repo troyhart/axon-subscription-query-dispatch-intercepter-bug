@@ -1,4 +1,4 @@
-package com.example.demo.api
+package com.example.demo.api.events
 
 interface PackageEvent {
   val packageId: String

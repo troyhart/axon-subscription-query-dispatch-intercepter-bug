@@ -8,10 +8,10 @@ import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.springframework.util.StringUtils;
 
-import com.example.demo.api.CreatePackage;
-import com.example.demo.api.PackageCreated;
-import com.example.demo.api.PackageUpdated;
-import com.example.demo.api.UpdatePackage;
+import com.example.demo.api.commands.CreatePackage;
+import com.example.demo.api.commands.UpdatePackage;
+import com.example.demo.api.events.PackageCreated;
+import com.example.demo.api.events.PackageUpdated;
 
 @Aggregate
 public class PackageAggregate {

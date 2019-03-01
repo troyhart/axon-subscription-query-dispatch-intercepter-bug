@@ -1,4 +1,4 @@
-package com.example.demo.api
+package com.example.demo.api.queries
 
 data class PackageRecordByIdQuery(
   val id: String

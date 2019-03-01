@@ -1,4 +1,4 @@
-package com.example.demo.api
+package com.example.demo.api.commands
 
 import org.axonframework.modelling.command.TargetAggregateIdentifier
 import org.springframework.util.Assert
