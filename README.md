@@ -23,8 +23,9 @@ You will need to bring the infrastructure up with:
 $ docker-compose up
 ```
 
-Then, you will need to bring up an editor that supports spring boot. I use Spring STS 4, but you can use whatever you
-use. For me, I just launch the application with the `Boot Dashboard`. 
+Then, you will need to bring up an editor that supports spring boot 2 and kotlin 1.2.x. I use Spring STS 4 with the 
+kotlin plugin (configurred for 1.2), but you can use whatever you use. For me, I just launch the application with 
+the `Boot Dashboard`. 
 
 Next you will point your browser to the [swagger API documentation](http://localhost:8080/swagger-ui.html)
 
